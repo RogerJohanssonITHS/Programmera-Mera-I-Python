@@ -7,9 +7,7 @@ Created on Wed Apr 27 13:35:48 2022
 # importera moduler
 import pandas as pd
 
-# läs in csv-filer
-kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
-pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
+# läs in csv-fil
 platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
 
 # gruppera datan på Kommun och Vägnummer
