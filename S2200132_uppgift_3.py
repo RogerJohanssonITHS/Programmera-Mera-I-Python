@@ -3,9 +3,10 @@
 Created on Wed Apr 27 20:56:54 2022
 
 """
-
+############### Uppgift 3a ################################
 # importera moduler
 import pandas as pd
+import numpy as np
 
 # läs in csv-fil
 kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
@@ -17,38 +18,80 @@ platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
 # kamerorna registrerat under hela mätperioden.
 
 # fråga efter kommunnamn tills giltigt namn anges
-# inmatadKommun = input("Skriv in kommun: ")
-inmatadKommun = 'Alingsås'
-# hitta kameraId från platsdata genom kommunnamnet
+giltigKommun = False
+while not (giltigKommun):
+    inmatadKommun = input("Skriv in kommun i Västergötland (som exv. Tibro): ")
+    for i in range(len(platsdata.Kommun)):
+        if inmatadKommun == platsdata.Kommun[i]:
+            print("Kommunen finns i databasen")
+            giltigKommun = True
+            break
+    if not (giltigKommun):
+        print("Ingen giltig kommun. Försök igen!\n")
 
-# labbar med merge
-mergedKameraPlatsData = pd.merge(kameradata, platsdata, how='inner', left_on = 'MätplatsID', right_on = 'MätplatsID')
-pd.set_option('display.max_columns', 100)
-pd.set_option('display.max_rows', 100)
+# hitta kameraId från platsdata genom kommunnamnet
+mergedKameraPlatsData = pd.merge(kameradata, platsdata, how='inner',
+                                 left_on='MätplatsID', right_on='MätplatsID')
 
 mergedKPDGrouped = mergedKameraPlatsData.groupby(['Kommun', 'Vägnummer'])
 
-# print(mergedKameraPlatsData.head())
-# mask = mergedKameraPlatsData['Kommun'] == 'Alingsås'
-# print(mergedKameraPlatsData[mask]['Hastighet'].max())
-
-
-for keys in mergedKPDGrouped.groups.keys():
-    if keys[0] == inmatadKommun:
-        # keys[1] ger vägnumret
-        maxUppmattHast = mergedKPDGrouped.get_group(keys).max()
-        print(maxUppmattHast)
-
+# ordna med genitiv-s på kommunnamnet och lägg till kommun
+if inmatadKommun[-1] != "s":
+    inmatadKommunGenitiv = inmatadKommun + "s" + " kommun"
+else:
+    inmatadKommunGenitiv = inmatadKommun + " kommun"
 
 # Konstruera tabellen
-print('==================================================================================================\n')
-print(f'{"" : <10}{"Kameraregistrerade hastighetsöverträdelser i": ^50} {"KOMMUNNAMN"}\n')
+print('============================================================================================================\n')
+print(f'{"" : <10}{"Kameraregistrerade hastighetsöverträdelser i":<10} {inmatadKommunGenitiv:<40}')
 print(f'{"" : <10}{"2021-09-11 kl.0700-18.00": ^50}\n')
 print(f'{"Vägnummer":<20} {"Max hastighet (km/h)":<20} {"Överträdelser (%)":<20} {"Högsta uppmätta ---":<20} {"Tidpunkt":>20}')
 print(f'{"":<20} {"":<20} {"":<20} {"hastighet (km/h)":<20} {"":>20}')
-print('--------------------------------------------------------------------------------------------------\n')
+print('------------------------------------------------------------------------------------------------------------\n')
 
 # ta fram tabellinnehåll
+for keys in mergedKPDGrouped.groups.keys():
+    if keys[0] == inmatadKommun:
+        # keys[1] ger vägnumret
+        maxUppmattHastObjekt = mergedKPDGrouped.get_group(keys).max()
+        gallandeHastighet = maxUppmattHastObjekt['Gällande Hastighet']
+        maxUppmattHastighet = maxUppmattHastObjekt['Hastighet']
+        tidpunkt = maxUppmattHastObjekt['Tid']
+        antalUppmattHast = mergedKPDGrouped.get_group(keys)['Datum'].count()
+        antalUppmattHastOver = mergedKPDGrouped.get_group(keys)[mergedKPDGrouped.get_group(keys)['Hastighet']>gallandeHastighet]['Tid'].count()
+        overtradelser = round((antalUppmattHastOver/antalUppmattHast) * 100, 1)
+        print(f'{keys[1]:<20} {gallandeHastighet:<20} {overtradelser:<20} {maxUppmattHastighet:<20} {tidpunkt:>20}\n')
 
-print('==================================================================================================\n')
 
+print('============================================================================================================\n')
+
+#################### Uppgift 3b #####################################
+# Utgå ifrån programmet i uppgift 3a och modifiera detta och skapa en ny tabell
+# enligt nedan som skriver ut antalet böter och indragna körkort som utfärdats
+# per vägnummer under mätperioden i den kommun som angavs i uppg 3a.
+
+
+# Konstruera tabellen
+print('============================================================================================================\n')
+print(f'{"" : <10}{"Påföljder vid kameraregistrerade hastighetsöverträdelser i":<10} {inmatadKommunGenitiv:<40}')
+print(f'{"" : <10}{"2021-09-11 kl.0700-18.00": ^50}\n')
+print(f'{"Vägnummer":<20} {"Max hastighet (km/h)":<20} {"Uppmätt hastighet":<20} {"Tidpunkt":<20} {"Påföljd":>20}')
+print('------------------------------------------------------------------------------------------------------------\n')
+
+# ta fram tabellinnehåll
+# gör om pafoljd till panda.Series
+granser = pafoljd['Hastighetsöverträdelse (km/h)'].squeeze()
+straffSatser = pafoljd['Påföljd'].squeeze()
+
+for keys in mergedKPDGrouped.groups.keys():
+    if keys[0] == inmatadKommun:
+        gallandeHastighet = maxUppmattHastObjekt['Gällande Hastighet']
+        uppmattHastOver = mergedKPDGrouped.get_group(keys)[mergedKPDGrouped.get_group(keys)['Hastighet']>gallandeHastighet]
+        hastigheter = uppmattHastOver['Hastighet'].values
+        tidpunkter = uppmattHastOver['Tid'].values
+        hastighetTidpunkt = zip(hastigheter, tidpunkter)
+        for hastighet, tidpunkt in hastighetTidpunkt:
+            idx = np.argmax(granser >= hastighet - gallandeHastighet)
+            print(f'{keys[1]:<20} {gallandeHastighet:<20} {hastighet:<20} {tidpunkt:<20} {straffSatser[idx]:>20}\n')
+
+print('============================================================================================================\n')
