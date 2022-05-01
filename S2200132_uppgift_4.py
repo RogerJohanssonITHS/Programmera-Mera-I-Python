@@ -38,8 +38,6 @@ for key in mergedKPDGrouped.groups.keys():
 df_tabell = pd.DataFrame(tabell, columns=['Kommun', 'Vägnummer', 'Överträdelser'])
 df_tabell_grouped_sorted = df_tabell.groupby(['Kommun'])\
 [['Vägnummer', 'Överträdelser']].max().sort_values('Överträdelser', ascending=False).reset_index()
-print(df_tabell_grouped_sorted)
-print(type(df_tabell_grouped_sorted))
 # Konstruera tabellen
 print('============================================================================================================\n')
 print(f'{"Det vägnummer inom respektive kommun där kameran registrerat procentuellt flest"}')
