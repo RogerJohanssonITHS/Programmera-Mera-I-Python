@@ -3,6 +3,9 @@
 Created on Wed Apr 27 13:35:48 2022
 
 """
+# Skriv ett program som grupperar kamerorna per kommun och vägnummer.
+# Tabellen ska innehålla kommun, vägnummer, antal kameror som finns
+# installerade på detta vägnummer.
 
 # importera moduler
 import pandas as pd
@@ -20,8 +23,9 @@ print('============================================================\n')
 
 kommun = ""  # variabel som innehåller det senast utskrivna kommunnamnet
 for keys in platsdataGrupperadKommunVag.groups.keys():
-    antalKameror = platsdataGrupperadKommunVag.get_group(keys)['Kommun'].count()
-    if kommun == keys[0]:  # skriv inte ut kommunnamnet om det var samma som förra
+    antalKameror = platsdataGrupperadKommunVag.\
+                get_group(keys)['Kommun'].count()
+    if kommun == keys[0]:  # skriv inte ut kommunnamnet om det repeteras
         print(f'{"":<20} {keys[1]:<20} {antalKameror:>5}')
     else:
         print(f'{keys[0]:<20} {keys[1]:<20} {antalKameror:>5}')

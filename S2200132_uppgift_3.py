@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Apr 27 20:56:54 2022
-
 """
-############### Uppgift 3a ################################
+# Uppgift 3a
+
+# Skriv ett program som först frågar efter en kommun och därefter skapar
+# en tabell som innehåller de hastighetsöverträdelser som kamerorna
+# registrerat under hela mätperioden.
+
+
 # importera moduler
 import pandas as pd
 import numpy as np
@@ -13,9 +18,6 @@ kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
 pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
 platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
 
-# Skriv ett program som först frågar efter en kommun och därefter skapar
-# en tabell enligt nedan som innehåller de hastighetsöverträdelser som
-# kamerorna registrerat under hela mätperioden.
 
 # fråga efter kommunnamn tills giltigt namn anges
 giltigKommun = False
@@ -65,7 +67,8 @@ for keys in mergedKPDGrouped.groups.keys():
 
 print('============================================================================================================\n')
 
-#################### Uppgift 3b #####################################
+# Uppgift 3b
+
 # Utgå ifrån programmet i uppgift 3a och modifiera detta och skapa en ny tabell
 # enligt nedan som skriver ut antalet böter och indragna körkort som utfärdats
 # per vägnummer under mätperioden i den kommun som angavs i uppg 3a.

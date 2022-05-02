@@ -24,11 +24,14 @@ mergedKPDGrouped = mergedKameraPlatsData.groupby(['MätplatsID', 'Kommun', 'Väg
 # skapa en behållare för tabellen
 tabell = []
 for key in mergedKPDGrouped.groups.keys():
-    gallandeHastighetObj = mergedKPDGrouped.get_group(key)['Gällande Hastighet'].to_numpy()
+    gallandeHastighetObj = mergedKPDGrouped.\
+        get_group(key)['Gällande Hastighet'].to_numpy()
     kommun = mergedKPDGrouped.get_group(key)['Kommun']
     gallandeHastighet = gallandeHastighetObj[0]
     antalUppmattHast = mergedKPDGrouped.get_group(key)['Datum'].count()
-    antalUppmattHastOver = mergedKPDGrouped.get_group(key)[mergedKPDGrouped.get_group(key)['Hastighet']>gallandeHastighet]['Tid'].count()
+    antalUppmattHastOver = mergedKPDGrouped.\
+        get_group(key)[mergedKPDGrouped.get_group(key)
+                       ['Hastighet'] > gallandeHastighet]['Tid'].count()
     overtradelser = round((antalUppmattHastOver/antalUppmattHast) * 100, 1)
     # spara till en tabell
     tabell.append([key[1], key[2], overtradelser])
@@ -36,8 +39,8 @@ for key in mergedKPDGrouped.groups.keys():
 
 # gallra tabellen och sortera i storleksordning
 df_tabell = pd.DataFrame(tabell, columns=['Kommun', 'Vägnummer', 'Överträdelser'])
-df_tabell_grouped_sorted = df_tabell.groupby(['Kommun'])\
-[['Vägnummer', 'Överträdelser']].max().sort_values('Överträdelser', ascending=False).reset_index()
+df_tabell_grouped_sorted = df_tabell.groupby(['Kommun'])[['Vägnummer', 'Överträdelser']].\
+    max().sort_values('Överträdelser', ascending=False).reset_index()
 # Konstruera tabellen
 print('============================================================================================================\n')
 print(f'{"Det vägnummer inom respektive kommun där kameran registrerat procentuellt flest"}')
