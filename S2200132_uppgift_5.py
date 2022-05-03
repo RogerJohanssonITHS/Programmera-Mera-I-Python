@@ -23,7 +23,6 @@ kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
 matplatsMaxAntalFordon = kameradata.groupby('MätplatsID').\
     size().agg(['idxmax', 'max'])
 
-# använd det funna MätplatsID:et och räkna antal fordon per timme
 # konvertera kolumnen Tid till ett datetime-objekt
 kameradata['Tid'] = pd.to_datetime(kameradata['Tid'])
 
@@ -41,10 +40,12 @@ for timma in range(7, 18):
 matplatsBeskrivning = platsdata[platsdata['MätplatsID'] == matplatsMaxAntalFordon[0]]
 
 pltTitel = "Antal fordon som kamerorna registrerat i " + matplatsBeskrivning.iat[0, 1] \
-    + " - väg" + matplatsBeskrivning.iat[0, 2] + "\ni " + matplatsBeskrivning.iat[0, 3] + " under perioden 2021-09-11 kl.07.00 - 18.00"
+    + " - väg" + matplatsBeskrivning.iat[0, 2] \
+    + "\ni " + matplatsBeskrivning.iat[0, 3] + " under perioden 2021-09-11 kl.07.00 - 18.00"
 
 # sätter attributen för grafen
-klockslagEtiketter = ['8:00', '9:00', '10:00','11:00', '12:00', '13:00', '14:00','15:00', '16:00', '17:00', '18:00']
+klockslagEtiketter = ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00',
+                      '14:00', '15:00', '16:00', '17:00', '18:00']
 plt.xticks(rotation=45)
 plt.grid()
 plt.xlabel('Klockslag')

@@ -16,21 +16,21 @@ platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
 # ta fram tabellinnehåll
 # slå ihop kameradata med platsdata via MätplatsID och
 # gruppera på Kommun och vägnummer
-mergedKameraPlatsData = pd.merge(kameradata, platsdata, how='inner',
+kameraPlatsData = pd.merge(kameradata, platsdata, how='inner',
                                  left_on='MätplatsID', right_on='MätplatsID')
 
-mergedKPDGrouped = mergedKameraPlatsData.groupby(['MätplatsID', 'Kommun', 'Vägnummer'])
+grupperadKameraPlatsData = kameraPlatsData.groupby(['MätplatsID', 'Kommun', 'Vägnummer'])
 
 # skapa en behållare för tabellen
 tabell = []
-for key in mergedKPDGrouped.groups.keys():
-    gallandeHastighetObj = mergedKPDGrouped.\
+for key in grupperadKameraPlatsData.groups.keys():
+    gallandeHastighetObj = grupperadKameraPlatsData.\
         get_group(key)['Gällande Hastighet'].to_numpy()
-    kommun = mergedKPDGrouped.get_group(key)['Kommun']
+    kommun = grupperadKameraPlatsData.get_group(key)['Kommun']
     gallandeHastighet = gallandeHastighetObj[0]
-    antalUppmattHast = mergedKPDGrouped.get_group(key)['Datum'].count()
-    antalUppmattHastOver = mergedKPDGrouped.\
-        get_group(key)[mergedKPDGrouped.get_group(key)
+    antalUppmattHast = grupperadKameraPlatsData.get_group(key)['Datum'].count()
+    antalUppmattHastOver = grupperadKameraPlatsData.\
+        get_group(key)[grupperadKameraPlatsData.get_group(key)
                        ['Hastighet'] > gallandeHastighet]['Tid'].count()
     overtradelser = round((antalUppmattHastOver/antalUppmattHast) * 100, 1)
     # spara till en tabell
@@ -42,14 +42,17 @@ df_tabell = pd.DataFrame(tabell, columns=['Kommun', 'Vägnummer', 'Överträdels
 df_tabell_grouped_sorted = df_tabell.groupby(['Kommun'])[['Vägnummer', 'Överträdelser']].\
     max().sort_values('Överträdelser', ascending=False).reset_index()
 # Konstruera tabellen
-print('============================================================================================================\n')
+print('==================================================================='
+      '=========================================\n')
 print(f'{"Det vägnummer inom respektive kommun där kameran registrerat procentuellt flest"}')
 print(f'{"" : <7}{"hastighetsöverträdelser under perioden 2021-09-11 kl.07.00-18.00"}\n')
 print(f'{"Kommun":<20} {"Vägnummer":<20} {"Överträdelser (%)":<20}')
-print('------------------------------------------------------------------------------------------------------------\n')
+print('-------------------------------------------------------------------'
+      '-----------------------------------------\n')
 for i in range(len(df_tabell_grouped_sorted)):
     print(f'{df_tabell_grouped_sorted.iloc[i, 0]:<20} {df_tabell_grouped_sorted.iloc[i, 1]:<20} {df_tabell_grouped_sorted.iloc[i, 2]:<20}')
-print('============================================================================================================\n')
+print('==================================================================='
+      '=========================================\n')
 
 
 

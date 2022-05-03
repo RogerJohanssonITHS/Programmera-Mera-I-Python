@@ -32,10 +32,10 @@ while not (giltigKommun):
         print("Ingen giltig kommun. Försök igen!\n")
 
 # hitta kameraId från platsdata genom kommunnamnet
-mergedKameraPlatsData = pd.merge(kameradata, platsdata, how='inner',
+kameraPlatsData = pd.merge(kameradata, platsdata, how='inner',
                                  left_on='MätplatsID', right_on='MätplatsID')
 
-mergedKPDGrouped = mergedKameraPlatsData.groupby(['Kommun', 'Vägnummer'])
+grupperadKameraPlatsData = kameraPlatsData.groupby(['Kommun', 'Vägnummer'])
 
 # ordna med genitiv-s på kommunnamnet och lägg till kommun
 if inmatadKommun[-1] != "s":
@@ -44,28 +44,32 @@ else:
     inmatadKommunGenitiv = inmatadKommun + " kommun"
 
 # Konstruera tabellen
-print('============================================================================================================\n')
+print('===================================================================='
+      '========================================\n')
 print(f'{"" : <10}{"Kameraregistrerade hastighetsöverträdelser i":<10} {inmatadKommunGenitiv:<40}')
 print(f'{"" : <10}{"2021-09-11 kl.0700-18.00": ^50}\n')
 print(f'{"Vägnummer":<20} {"Max hastighet (km/h)":<20} {"Överträdelser (%)":<20} {"Högsta uppmätta ---":<20} {"Tidpunkt":>20}')
 print(f'{"":<20} {"":<20} {"":<20} {"hastighet (km/h)":<20} {"":>20}')
-print('------------------------------------------------------------------------------------------------------------\n')
+print('--------------------------------------------------------------------'
+      '----------------------------------------\n')
 
 # ta fram tabellinnehåll
-for keys in mergedKPDGrouped.groups.keys():
+for keys in grupperadKameraPlatsData.groups.keys():
     if keys[0] == inmatadKommun:
         # keys[1] ger vägnumret
-        maxUppmattHastObjekt = mergedKPDGrouped.get_group(keys).max()
+        maxUppmattHastObjekt = grupperadKameraPlatsData.get_group(keys).max()
         gallandeHastighet = maxUppmattHastObjekt['Gällande Hastighet']
         maxUppmattHastighet = maxUppmattHastObjekt['Hastighet']
         tidpunkt = maxUppmattHastObjekt['Tid']
-        antalUppmattHast = mergedKPDGrouped.get_group(keys)['Datum'].count()
-        antalUppmattHastOver = mergedKPDGrouped.get_group(keys)[mergedKPDGrouped.get_group(keys)['Hastighet']>gallandeHastighet]['Tid'].count()
+        antalUppmattHast = grupperadKameraPlatsData.get_group(keys)['Datum'].count()
+        antalUppmattHastOver = grupperadKameraPlatsData.get_group(keys)[grupperadKameraPlatsData.
+                get_group(keys)['Hastighet'] > gallandeHastighet]['Tid'].count()
         overtradelser = round((antalUppmattHastOver/antalUppmattHast) * 100, 1)
-        print(f'{keys[1]:<20} {gallandeHastighet:<20} {overtradelser:<20} {maxUppmattHastighet:<20} {tidpunkt:>20}\n')
+        print(f'{keys[1]:<20} {gallandeHastighet:<20} {overtradelser:<20} {maxUppmattHastighet:<20} {tidpunkt:>20}')
 
 
-print('============================================================================================================\n')
+print('===================================================================='
+      '========================================\n')
 
 # Uppgift 3b
 
@@ -75,26 +79,30 @@ print('=========================================================================
 
 
 # Konstruera tabellen
-print('============================================================================================================\n')
+print('===================================================================='
+      '========================================\n')
 print(f'{"" : <10}{"Påföljder vid kameraregistrerade hastighetsöverträdelser i":<10} {inmatadKommunGenitiv:<40}')
 print(f'{"" : <10}{"2021-09-11 kl.0700-18.00": ^50}\n')
 print(f'{"Vägnummer":<20} {"Max hastighet (km/h)":<20} {"Uppmätt hastighet":<20} {"Tidpunkt":<20} {"Påföljd":>20}')
-print('------------------------------------------------------------------------------------------------------------\n')
+print('--------------------------------------------------------------------'
+      '----------------------------------------\n')
 
 # ta fram tabellinnehåll
 # gör om pafoljd till panda.Series
 granser = pafoljd['Hastighetsöverträdelse (km/h)'].squeeze()
 straffSatser = pafoljd['Påföljd'].squeeze()
 
-for keys in mergedKPDGrouped.groups.keys():
+for keys in grupperadKameraPlatsData.groups.keys():
     if keys[0] == inmatadKommun:
         gallandeHastighet = maxUppmattHastObjekt['Gällande Hastighet']
-        uppmattHastOver = mergedKPDGrouped.get_group(keys)[mergedKPDGrouped.get_group(keys)['Hastighet']>gallandeHastighet]
+        uppmattHastOver = grupperadKameraPlatsData.\
+            get_group(keys)[grupperadKameraPlatsData.get_group(keys)['Hastighet'] > gallandeHastighet]
         hastigheter = uppmattHastOver['Hastighet'].values
         tidpunkter = uppmattHastOver['Tid'].values
         hastighetTidpunkt = zip(hastigheter, tidpunkter)
         for hastighet, tidpunkt in hastighetTidpunkt:
             idx = np.argmax(granser >= hastighet - gallandeHastighet)
-            print(f'{keys[1]:<20} {gallandeHastighet:<20} {hastighet:<20} {tidpunkt:<20} {straffSatser[idx]:>20}\n')
+            print(f'{keys[1]:<20} {gallandeHastighet:<20} {hastighet:<20} {tidpunkt:<20} {straffSatser[idx]:>20}')
 
-print('============================================================================================================\n')
+print('===================================================================='
+      '========================================\n')

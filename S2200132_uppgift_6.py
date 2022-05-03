@@ -44,20 +44,29 @@ matPlatser = platsdata[mask].groupby(['Vägnummer'])
 
 # konvertera kolumnen Tid till ett datetime-objekt
 kameradata['Tid'] = pd.to_datetime(kameradata['Tid'])
+
+# skapa variabler för att hålla summan av hastigheterna vid en mätplats
+# och antalet fordon som passerat
 matplatsSummaHastigheter = 0
 matplatsAntalFordon = 0
 vagSummaHastigheter = []
 vagAntalFordon = []
+
+# skapa variabel för att spara de etiketter som skall användas i grafen
+# vägnummer, gällande hastighet i en tuple
 maxHastLabelPlot = []
+
+
 for key in matPlatser.groups.keys():
     matplatsID = matPlatser.get_group(key)['MätplatsID'].tolist()
 
     for i in matplatsID:
         maxHastLabelPlot.append((platsdata[platsdata['MätplatsID'] == i]
             ['Vägnummer'].values[0], kameradata[kameradata['MätplatsID'] == i]['Gällande Hastighet'].max()))
+
     # loopa mätplatsID från mask och summera de uppmätta hastighetrna och antal fordon
-    vagsumma_test = []
-    vagAntalFordon_test = []
+    vagsumma = []
+    vagfordon = []
     for timma in range(7, 18):
         for i in matplatsID:
             mask = (kameradata['Tid'].dt.hour >= timma) & \
@@ -65,14 +74,14 @@ for key in matPlatser.groups.keys():
             matplatsSummaHastigheter += kameradata[mask][kameradata['MätplatsID'] == i]['Hastighet'].sum()
             matplatsAntalFordon += kameradata[mask][kameradata['MätplatsID'] == i]['Hastighet'].count()
         # när alla mätplatser för vägen är summerade; spara resultatet timvis
-        vagsumma_test.append(matplatsSummaHastigheter)
-        vagAntalFordon_test.append(matplatsAntalFordon)
+        vagsumma.append(matplatsSummaHastigheter)
+        vagfordon.append(matplatsAntalFordon)
         # nollställ variablerna
         matplatsSummaHastigheter = 0
         matplatsAntalFordon = 0
-    # lägg till ny lista för nästa väg
-    vagSummaHastigheter.append(vagsumma_test)
-    vagAntalFordon.append(vagAntalFordon_test)
+    # lägg till listan till slutlistan
+    vagSummaHastigheter.append(vagsumma)
+    vagAntalFordon.append(vagfordon)
 
 # ordna med genitiv-s på kommunnamnet och lägg till kommun
 if inmatadKommun[-1] != "s":
@@ -96,6 +105,7 @@ lazyListaLabels = []
 for a in labelsKomprimerad.items():
     lazyListaLabels.append(a)
 
+# skapa variabel för att spara medelhastigheterna per timma
 medelHastighetPerTimma = []
 for count, summaHast in enumerate(zip(vagSummaHastigheter, vagAntalFordon)):
     labelText = "Väg " + lazyListaLabels[count][0] + " - " + str(int(lazyListaLabels[count][1])) +" km/h"
