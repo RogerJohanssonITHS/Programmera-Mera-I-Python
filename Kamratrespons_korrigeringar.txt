@@ -1,0 +1,9 @@
+deluppgift 1: lagt till felhantering vid inläsning av fil
+
+deluppgift 2: lagt till felhantering vid inläsning av fil
+
+deluppgift 3a: lagt till felhantering vid inläsning av fil
+deluppgift 3b: lagt till fler kodkommentarer
+
+deluppgift 4: lagt till felhantering vid inläsning av fil
+			  TO DO!!!!!!  lagt till fler kodkommentarer

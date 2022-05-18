@@ -7,10 +7,18 @@ Created on Fri Apr 29 13:25:21 2022
 # importera moduler
 import pandas as pd
 
-# läs in csv-fil
-kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
-pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
-platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+
+# läs in csv-filer. Ge felmeddelande om de ej ligger i samma mapp.
+fileFound = False
+while not fileFound:
+    try:
+        kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+        pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
+        platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+        fileFound = True
+    except (FileNotFoundError, IOError):
+        print("Placera csv-filerna i samma mapp som programfilen")
+        input("Tryck på 'Retur' för att fortsätta")
 
 
 # ta fram tabellinnehåll

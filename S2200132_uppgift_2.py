@@ -13,8 +13,16 @@ Created on Wed Apr 27 18:00:59 2022
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# läs in csv-fil
-kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+# läs in csv-fil. Ge felmeddelande om den ej ligger i samma mapp.
+fileFound = False
+while not fileFound:
+    try:
+        kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+        fileFound = True
+    except (FileNotFoundError, IOError):
+        print("Placera csv-filen i samma mapp som programfilen")
+        input("Tryck på 'Retur' för att fortsätta")
+
 
 # konvertera kolumnen Tid till ett datetime-objekt
 kameradata['Tid'] = pd.to_datetime(kameradata['Tid'])

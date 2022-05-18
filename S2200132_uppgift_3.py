@@ -13,10 +13,17 @@ Created on Wed Apr 27 20:56:54 2022
 import pandas as pd
 import numpy as np
 
-# läs in csv-fil
-kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
-pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
-platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+# läs in csv-filer. Ge felmeddelande om de ej ligger i samma mapp.
+fileFound = False
+while not fileFound:
+    try:
+        kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+        pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
+        platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+        fileFound = True
+    except (FileNotFoundError, IOError):
+        print("Placera csv-filerna i samma mapp som programfilen")
+        input("Tryck på 'Retur' för att fortsätta")
 
 
 # fråga efter kommunnamn tills giltigt namn anges
@@ -54,13 +61,18 @@ print('--------------------------------------------------------------------'
       '----------------------------------------\n')
 
 # ta fram tabellinnehåll
+# keys i grupperadKameraPlatsData är Kommun och Vägnummer
 for keys in grupperadKameraPlatsData.groups.keys():
     if keys[0] == inmatadKommun:
-        # keys[1] ger vägnumret
+        # få fram objektet med högst uppmätt hastighet för aktuell kommun.
+        # För det objektet ta fram gällande hastighet och tidpunkt
         maxUppmattHastObjekt = grupperadKameraPlatsData.get_group(keys).max()
         gallandeHastighet = maxUppmattHastObjekt['Gällande Hastighet']
         maxUppmattHastighet = maxUppmattHastObjekt['Hastighet']
         tidpunkt = maxUppmattHastObjekt['Tid']
+
+        # räkna antalet uppmätta hastigheter och antalet uppmätta hastigheter
+        # som ligger över gällande hastighetsgräns. Detta ger överträdelser.
         antalUppmattHast = grupperadKameraPlatsData.get_group(keys)['Datum'].count()
         antalUppmattHastOver = grupperadKameraPlatsData.get_group(keys)[grupperadKameraPlatsData.
                 get_group(keys)['Hastighet'] > gallandeHastighet]['Tid'].count()
@@ -92,14 +104,20 @@ print('--------------------------------------------------------------------'
 granser = pafoljd['Hastighetsöverträdelse (km/h)'].squeeze()
 straffSatser = pafoljd['Påföljd'].squeeze()
 
+# keys i grupperadKameraPlatsData är Kommun och Vägnummer
 for keys in grupperadKameraPlatsData.groups.keys():
     if keys[0] == inmatadKommun:
-        gallandeHastighet = maxUppmattHastObjekt['Gällande Hastighet']
+        # ta fram de mätpunkter då den uppmätta hastigheten
+        # överstiger den gällande hastigheten
         uppmattHastOver = grupperadKameraPlatsData.\
             get_group(keys)[grupperadKameraPlatsData.get_group(keys)['Hastighet'] > gallandeHastighet]
+        
+        # zippa hastigheter och tidpunkter från ovanstående funna mätpunkter
         hastigheter = uppmattHastOver['Hastighet'].values
         tidpunkter = uppmattHastOver['Tid'].values
         hastighetTidpunkt = zip(hastigheter, tidpunkter)
+        
+        # hitta idx för straffsatsen
         for hastighet, tidpunkt in hastighetTidpunkt:
             idx = np.argmax(granser >= hastighet - gallandeHastighet)
             print(f'{keys[1]:<20} {gallandeHastighet:<20} {hastighet:<20} {tidpunkt:<20} {straffSatser[idx]:>20}')

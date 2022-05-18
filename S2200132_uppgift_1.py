@@ -10,8 +10,16 @@ Created on Wed Apr 27 13:35:48 2022
 # importera moduler
 import pandas as pd
 
-# läs in csv-fil
-platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+# läs in csv-fil. Ge felmeddelande om den ej ligger i samma mapp.
+fileFound = False
+while not fileFound:
+    try:
+        platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+        fileFound = True
+    except (FileNotFoundError, IOError):
+        print("Placera csv-filen i samma mapp som programfilen")
+        input("Tryck på 'Retur' för att fortsätta")
+
 
 # gruppera datan på Kommun och Vägnummer
 platsdataGrupperadKommunVag = platsdata.groupby(['Kommun', 'Vägnummer'])
