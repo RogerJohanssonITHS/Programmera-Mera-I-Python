@@ -15,9 +15,17 @@ Created on Sat Apr 30 12:50:51 2022
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# läs in csv-fil
-platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
-kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+# läs in csv-filer. Ge felmeddelande om de ej ligger i samma mapp.
+fileFound = False
+while not fileFound:
+    try:
+        platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+        kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+        fileFound = True
+    except (FileNotFoundError, IOError):
+        print("Placera csv-filerna i samma mapp som programfilen")
+        input("Tryck på 'Retur' för att fortsätta")
+
 
 # Hitta trafikplatsen med högst antal passerande fordon under mätperioden
 matplatsMaxAntalFordon = kameradata.groupby('MätplatsID').\

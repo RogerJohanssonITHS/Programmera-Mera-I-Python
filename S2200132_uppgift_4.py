@@ -30,6 +30,10 @@ kameraPlatsData = pd.merge(kameradata, platsdata, how='inner',
 grupperadKameraPlatsData = kameraPlatsData.groupby(['MätplatsID', 'Kommun', 'Vägnummer'])
 
 # skapa en behållare för tabellen
+# tabellens principiella utseende blir:
+# Kolumn 1 är key[1] dvs Kommun från grupperadKameraPlatsData
+# Kolumn 2 är key[2] dvs Vägnummer från grupperadKameraPlatsData
+# Kolumn 3 blir andelen överträdelser som beräknas nedan
 tabell = []
 for key in grupperadKameraPlatsData.groups.keys():
     gallandeHastighetObj = grupperadKameraPlatsData.\

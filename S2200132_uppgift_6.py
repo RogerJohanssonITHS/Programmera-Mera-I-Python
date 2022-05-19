@@ -17,10 +17,17 @@ Created on Sun May  1 13:27:58 2022
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# läs in csv-fil
-kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
-pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
-platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+# läs in csv-filer. Ge felmeddelande om de ej ligger i samma mapp.
+fileFound = False
+while not fileFound:
+    try:
+        kameradata = pd.read_csv('kameraData.csv', encoding='ISO-8859-1', sep=';')
+        pafoljd = pd.read_csv('pafoljd.csv', encoding='ISO-8859-1', sep=';')
+        platsdata = pd.read_csv('platsData.csv', encoding='ISO-8859-1', sep=';')
+        fileFound = True
+    except (FileNotFoundError, IOError):
+        print("Placera csv-filerna i samma mapp som programfilen")
+        input("Tryck på 'Retur' för att fortsätta")
 
 # fråga efter kommunnamn tills giltigt namn anges
 giltigKommun = False
@@ -53,10 +60,10 @@ vagSummaHastigheter = []
 vagAntalFordon = []
 
 # skapa variabel för att spara de etiketter som skall användas i grafen
-# vägnummer, gällande hastighet i en tuple
+# (vägnummer, gällande hastighet) i en tuple
 maxHastLabelPlot = []
 
-
+# loopa igenom mätplatserna för varje kommun
 for key in matPlatser.groups.keys():
     matplatsID = matPlatser.get_group(key)['MätplatsID'].tolist()
 
@@ -64,13 +71,13 @@ for key in matPlatser.groups.keys():
         maxHastLabelPlot.append((platsdata[platsdata['MätplatsID'] == i]
             ['Vägnummer'].values[0], kameradata[kameradata['MätplatsID'] == i]['Gällande Hastighet'].max()))
 
-    # loopa mätplatsID från mask och summera de uppmätta hastighetrna och antal fordon
+    # loopa mätplatsID över de aktuella timmarna och summera de
+    # uppmätta hastighetrna och antal fordon
     vagsumma = []
     vagfordon = []
     for timma in range(7, 18):
         for i in matplatsID:
-            mask = (kameradata['Tid'].dt.hour >= timma) & \
-                (kameradata['Tid'].dt.hour < timma + 1)
+            mask = (kameradata['Tid'].dt.hour >= timma) & (kameradata['Tid'].dt.hour < timma + 1)
             matplatsSummaHastigheter += kameradata[mask][kameradata['MätplatsID'] == i]['Hastighet'].sum()
             matplatsAntalFordon += kameradata[mask][kameradata['MätplatsID'] == i]['Hastighet'].count()
         # när alla mätplatser för vägen är summerade; spara resultatet timvis

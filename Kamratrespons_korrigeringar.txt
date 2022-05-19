@@ -6,4 +6,9 @@ deluppgift 3a: lagt till felhantering vid inläsning av fil
 deluppgift 3b: lagt till fler kodkommentarer
 
 deluppgift 4: lagt till felhantering vid inläsning av fil
-			  TO DO!!!!!!  lagt till fler kodkommentarer
+			  lagt till fler kodkommentarer
+
+deluppgift 5: lagt till felhantering vid inläsning av fil
+
+deluppgift 6: lagt till felhantering vid inläsning av fil
+			  lagt till fler kodkommentarer
