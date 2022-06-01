@@ -33,7 +33,8 @@ grupperadKameraPlatsData = kameraPlatsData.groupby(['MätplatsID', 'Kommun', 'V�
 # tabellens principiella utseende blir:
 # Kolumn 1 är key[1] dvs Kommun från grupperadKameraPlatsData
 # Kolumn 2 är key[2] dvs Vägnummer från grupperadKameraPlatsData
-# Kolumn 3 blir andelen överträdelser som beräknas nedan
+# Kolumn 3 blir antalet uppmätta hastigheter
+# Kolumn 4 blir antalet uppmätta hastighetsöverträdelser
 tabell = []
 for key in grupperadKameraPlatsData.groups.keys():
     gallandeHastighetObj = grupperadKameraPlatsData.\
@@ -42,17 +43,30 @@ for key in grupperadKameraPlatsData.groups.keys():
     gallandeHastighet = gallandeHastighetObj[0]
     antalUppmattHast = grupperadKameraPlatsData.get_group(key)['Datum'].count()
     antalUppmattHastOver = grupperadKameraPlatsData.\
-        get_group(key)[grupperadKameraPlatsData.get_group(key)
-                       ['Hastighet'] > gallandeHastighet]['Tid'].count()
-    overtradelser = round((antalUppmattHastOver/antalUppmattHast) * 100, 1)
+        get_group(key)[grupperadKameraPlatsData.get_group(key)['Hastighet'] > gallandeHastighet]['Tid'].count()
+    # overtradelser = round((antalUppmattHastOver/antalUppmattHast) * 100, 1)
     # spara till en tabell
-    tabell.append([key[1], key[2], overtradelser])
+    tabell.append([key[1], key[2], antalUppmattHast, antalUppmattHastOver])
 
-
+# summera över kommun och vägnummer och beräkna procentuella andelen 
 # gallra tabellen och sortera i storleksordning
-df_tabell = pd.DataFrame(tabell, columns=['Kommun', 'Vägnummer', 'Överträdelser'])
-df_tabell_grouped_sorted = df_tabell.groupby(['Kommun'])[['Vägnummer', 'Överträdelser']].\
-    max().sort_values('Överträdelser', ascending=False).reset_index()
+df_tabell = pd.DataFrame(tabell, columns=['Kommun', 'Vägnummer', 'Antal fordon', 'Antal överträdelser'])
+
+df_tabell_summor = df_tabell.groupby(['Kommun','Vägnummer'])['Antal fordon', 'Antal överträdelser'].sum()
+
+# lägg till kolumn för procentuella andelen överträdelser i procent
+df_tabell_summor['Andel överträdelser'] = df_tabell_summor['Antal överträdelser']/df_tabell_summor['Antal fordon'] * 100
+
+# sortera i storleksordning på Kommun och Vägnummer
+df_tabell_summor_sorted = df_tabell_summor.groupby(['Kommun', 'Vägnummer'])[['Andel överträdelser']].\
+    max().sort_values('Andel överträdelser', ascending=False).reset_index()
+
+# spara bara första raden för varje kommun (innehåller högsta värdet för Andel överträdelser)
+df_gallrad = df_tabell_summor_sorted.drop_duplicates(subset=['Kommun'])
+
+# avrunda värdena i kolumnen Andel överträdelser till en decimal
+df_gallrad['Andel överträdelser'] = df_gallrad['Andel överträdelser'].round(decimals=1)
+
 # Konstruera tabellen
 print('==================================================================='
       '=========================================\n')
@@ -61,13 +75,7 @@ print(f'{"" : <7}{"hastighetsöverträdelser under perioden 2021-09-11 kl.07.00-
 print(f'{"Kommun":<20} {"Vägnummer":<20} {"Överträdelser (%)":<20}')
 print('-------------------------------------------------------------------'
       '-----------------------------------------\n')
-for i in range(len(df_tabell_grouped_sorted)):
-    print(f'{df_tabell_grouped_sorted.iloc[i, 0]:<20} {df_tabell_grouped_sorted.iloc[i, 1]:<20} {df_tabell_grouped_sorted.iloc[i, 2]:<20}')
+for i in range(len(df_gallrad)):
+    print(f'{df_gallrad.iloc[i, 0]:<20} {df_gallrad.iloc[i, 1]:<20} {df_gallrad.iloc[i, 2]:<20}')
 print('==================================================================='
       '=========================================\n')
-
-
-
-
-
-
