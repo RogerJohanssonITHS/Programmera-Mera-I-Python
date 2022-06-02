@@ -48,8 +48,7 @@ for key in grupperadKameraPlatsData.groups.keys():
     # spara till en tabell
     tabell.append([key[1], key[2], antalUppmattHast, antalUppmattHastOver])
 
-# summera över kommun och vägnummer och beräkna procentuella andelen 
-# gallra tabellen och sortera i storleksordning
+# summera över kommun och vägnummer och beräkna procentuella andelen överträdelser.
 df_tabell = pd.DataFrame(tabell, columns=['Kommun', 'Vägnummer', 'Antal fordon', 'Antal överträdelser'])
 
 df_tabell_summor = df_tabell.groupby(['Kommun','Vägnummer'])['Antal fordon', 'Antal överträdelser'].sum()
